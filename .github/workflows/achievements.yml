@@ -4,6 +4,7 @@ on:
   schedule: [{ cron: "17 */6 * * *" }]
   workflow_dispatch:
 permissions: { contents: write, issues: read }
+concurrency: { group: achievements-snapshot, cancel-in-progress: false }
 jobs:
   fold:
     runs-on: ubuntu-latest
@@ -27,4 +28,4 @@ jobs:
           json.dump({"generated_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"submissions":len(issues),"finished":finished,"counts":counts},open('metrics/achievements.json','w'),indent=1)
           PY
           git config user.name achievements-bot; git config user.email actions@users.noreply.github.com
-          git add metrics/achievements.json; git diff --cached --quiet || (git commit -m "achievements snapshot" && git push)
+          git add metrics/achievements.json; git diff --cached --quiet || (git commit -m "achievements snapshot" && git pull --rebase -X theirs origin main && git push)
