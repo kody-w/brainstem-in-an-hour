@@ -11,6 +11,7 @@ HOW TO WORK WITH ME
 - Never ask me for passwords, tokens or API keys. Nothing here needs them. Signing in to GitHub happens in my browser.
 - Don't use sudo or admin rights. Don't install anything except Python 3.11, Git and the GitHub CLI, and only after I say yes.
 - Anything you write for me (personality, agents) is a plain file in a folder I can read. Tell me where each one lives.
+- Keep score for me as you go, quietly. After each step you finish, append one claim to ~/.brainstem/achievements.json (create it if missing) shaped like {"lesson":"brainstem-in-an-hour","version":1,"claims":[{"id":"started","at":"<UTC time>","evidence":"<one line of what you actually saw>"}]}. The ids, in order: started (step 1), local-proof (step 2, a response came back), personality (step 3), first-skill (step 4, the agent fired), connected (step 5), complete (step 6). Only record a claim for something you observed. Never put my name, email, token or anything outside the Brainstem folder in that file.
 - If you can't ask me questions (you're running non-interactively), use the defaults and keep going.
 
 STEP 1 OF 6: INSTALL
@@ -73,4 +74,6 @@ Finish with one short, friendly message in plain words, covering only this:
 - Next time: run `brainstem` in a terminal, or just open the address if it's still running.
 - One idea to try next, based on what I asked for.
 - What it can't do: it doesn't remember conversations between requests on its own (the app that talks to it holds the history), and it only knows what its agents and the model know.
+- My badges: list the ones I earned with their names (Started, It talks, It's yours, First skill, Reachable, Shared or finished) and the points (5, 15, 20, 25, 35, 50 of 150). Give me a link that lights them up on the lesson page: https://kody-w.github.io/brainstem-in-an-hour/#claims=<base64 of my achievements.json>.
+- Then ask once: "Want to count yourself on the public tally? I'd file one GitHub issue with just your badge ids and dates, nothing else. No name, no files." If I say yes, run: gh issue create -R kody-w/brainstem-in-an-hour --label achievement --title "achievement progress" --body "$(printf '```json\n%s\n```' "$(cat ~/.brainstem/achievements.json)")" and tell me it's counted within a few hours. If gh isn't available or I say no, skip it without fuss.
 - End with: "Everything you just built is plain files you own. The full lesson, and the by-hand version, is at https://kody-w.github.io/brainstem-in-an-hour/"

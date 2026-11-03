@@ -26,6 +26,10 @@
   hr { border:0; border-top:1px solid var(--line); margin:48px 0; }
   details summary { cursor:pointer; color:var(--soft); }
   details pre { white-space:pre-wrap; background:var(--code); border:1px solid var(--line); border-radius:8px; padding:14px; font:13px/1.5 ui-monospace, Menlo, monospace; max-height:360px; overflow:auto; }
+  .badges { list-style:none; padding:0; margin:12px 0; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
+  .badges li { border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:#fff; opacity:.55; }
+  .badges li.on { opacity:1; border-color:var(--accent); box-shadow:inset 3px 0 0 var(--accent); }
+  .badges b { display:block; } .badges small { color:var(--soft); }
 </style>
 </head>
 <body>
@@ -60,6 +64,12 @@
 <div class="say"><em>"Show me what you wrote."</em> Everything it made is plain text you can read. Nothing is hidden.</div>
 <div class="say"><em>"Explain what you just did like I'm new."</em> It's supposed to. Hold it to that.</div>
 <div class="say"><em>"Slow down, one step at a time."</em> or <em>"Skip that, I'll do it later."</em></div>
+
+<h2>Your badges</h2>
+<p>Your AI keeps score for you while it works, in a plain file on your computer. When it hands you your link at the end, this list lights up. Nothing here needs an account.</p>
+<ul id="badges" class="badges"></ul>
+<p class="small" id="tally">Loading the public tally…</p>
+<p class="small">Badges are <em>Local</em> until your AI, with your yes, files them on the public tally; then they count as <em>Verified</em>. The tally holds badge ids and dates only, never names. <a href="https://github.com/kody-w/brainstem-in-an-hour/blob/main/ACHIEVEMENTS.md">How it works.</a></p>
 
 <h2>When the hour is up</h2>
 <p>You own an assistant that lives on your computer, costs nothing beyond your GitHub account, and is made of plain files you can read, copy and hand to someone else. Next time you want it to do something new, you don't come back here. You just tell your AI.</p>
@@ -147,7 +157,7 @@ Finish with one short, friendly message in plain words, covering only this:
 </pre></details>
 <details><summary>For the technical: what's under the hood</summary><p class="small">The Brainstem is the open-source <a href="https://kody-w.github.io/rapp-installer/">RAPP Brainstem</a> (MIT). The contract your AI builds on: one web address in, a <code>response</code> out, skills as single files. The <a href="https://github.com/kody-w/rapp-installer/blob/main/rapp_brainstem/README.md">full reference</a> and the public <a href="https://github.com/kody-w/RAR">registry of agents</a> live on GitHub.</p></details>
 
-<p class="small" id="lesson-v3">brainstem-in-an-hour v3 · 2026-11-02 · the person talks, the AI does the computer</p>
+<p class="small" id="lesson-v4">brainstem-in-an-hour v4 · 2026-11-02 · the person talks, the AI does the computer</p>
 
 </main>
 <script>
@@ -156,6 +166,19 @@ document.getElementById('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(t);document.getElementById('copied').textContent='Copied. Now paste it into your AI.';}
   catch(e){document.querySelector('details').open=true;const r=document.createRange();r.selectNodeContents(document.getElementById('prompt-text'));getSelection().removeAllRanges();getSelection().addRange(r);document.getElementById('copied').textContent='Select-all and copy the text below.';}
 };
+
+(async()=>{
+  const list=document.getElementById('badges'); let defs=[];
+  try{defs=(await (await fetch('achievements.json')).json()).badges;}catch(e){}
+  let mine=new Set(); const m=location.hash.match(/claims=([A-Za-z0-9+/=_-]+)/);
+  if(m){try{mine=new Set(JSON.parse(atob(m[1].replace(/-/g,'+').replace(/_/g,'/'))).claims.map(c=>c.id));}catch(e){}}
+  let counts={};try{const t=await (await fetch('metrics/achievements.json')).json();counts=t.counts||{};
+    document.getElementById('tally').textContent=(t.finished||0)+' people have finished the hour and said so. '+(t.submissions||0)+' filed progress.';}
+  catch(e){document.getElementById('tally').textContent='';}
+  for(const d of defs){const li=document.createElement('li');if(mine.has(d.id))li.className='on';
+    li.innerHTML='<b>'+d.title+(mine.has(d.id)?' ✓':'')+'</b><small>'+d.points+' pts'+(counts[d.id]?' · '+counts[d.id]+' earned':'')+'</small>';list.appendChild(li);}
+  if(mine.size){const pts=defs.filter(d=>mine.has(d.id)).reduce((a,d)=>a+d.points,0);document.getElementById('tally').textContent='You: '+pts+' of 150 points (Local). '+document.getElementById('tally').textContent;}
+})();
 </script>
 </body>
 </html>
