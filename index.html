@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build your own AI agent in one hour</title>
+<meta name="description" content="A one-hour lesson. Install a Brainstem, talk to it, give it a personality, write your first agent, and share it. No API keys. Just your GitHub account.">
+<style>
+  :root { --ink:#1b1b1b; --soft:#5a5a5a; --line:#e6e2da; --paper:#fbfaf7; --accent:#b4532a; --code:#f1efe9; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:18px/1.6 Georgia, "Times New Roman", serif; color:var(--ink); background:var(--paper); }
+  main { max-width:720px; margin:0 auto; padding:48px 24px 96px; }
+  h1 { font-size:2.4rem; line-height:1.15; margin:0 0 8px; }
+  h2 { font-size:1.5rem; margin:64px 0 8px; }
+  .clock { font:600 13px/1 ui-monospace, Menlo, monospace; color:var(--accent); letter-spacing:.08em; text-transform:uppercase; }
+  .lead { font-size:1.2rem; color:var(--soft); margin:0 0 32px; }
+  p { margin:14px 0; }
+  pre { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:14px 16px; overflow-x:auto; font:14px/1.5 ui-monospace, Menlo, monospace; }
+  code { font:0.92em ui-monospace, Menlo, monospace; background:var(--code); padding:1px 5px; border-radius:4px; }
+  pre code { background:none; padding:0; }
+  .check { border-left:3px solid var(--accent); padding:8px 16px; margin:18px 0; background:#fff; }
+  .check strong { color:var(--accent); }
+  .toc { border:1px solid var(--line); border-radius:8px; padding:16px 22px; background:#fff; margin:0 0 24px; }
+  .toc ol { margin:6px 0 0; padding-left:22px; }
+  .toc li { margin:4px 0; }
+  a { color:var(--accent); }
+  .small { font-size:.95rem; color:var(--soft); }
+  hr { border:0; border-top:1px solid var(--line); margin:56px 0; }
+  details { margin:12px 0; }
+  summary { cursor:pointer; color:var(--soft); }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Build your own AI agent in one hour</h1>
+<p class="lead">By the end of this page you will have an AI assistant running on your own computer, with a personality you wrote and a tool you built. It uses the GitHub Copilot account you already have. No API keys. Nothing to pay for.</p>
+
+<div class="toc">
+  <strong>The hour</strong>
+  <ol>
+    <li><a href="#install">Install it</a> (10 minutes)</li>
+    <li><a href="#talk">Talk to it</a> (10 minutes)</li>
+    <li><a href="#soul">Give it a personality</a> (10 minutes)</li>
+    <li><a href="#agent">Build your first agent</a> (15 minutes)</li>
+    <li><a href="#anywhere">Use it from anywhere</a> (10 minutes)</li>
+    <li><a href="#share">Share it</a> (5 minutes)</li>
+  </ol>
+</div>
+
+<p><strong>You need:</strong> a Mac, Windows or Linux computer, a GitHub account with Copilot (the free plan works), and a terminal. If you have never opened a terminal, that's fine. Every command on this page is copy and paste.</p>
+
+<p><strong>What you're building:</strong> a <em>Brainstem</em>. It's a small server that sits on your computer, thinks with GitHub Copilot, and can run little programs you write, called <em>agents</em>. Think of it as the brain, and each agent as one skill it can use.</p>
+
+<hr>
+
+<h2 id="install"><span class="clock">0:00</span><br>1. Install it</h2>
+
+<p>Open a terminal and paste one line.</p>
+
+<p><strong>Mac or Linux</strong></p>
+<pre><code>curl -fsSL https://kody-w.github.io/rapp-installer/install.sh | bash</code></pre>
+
+<p><strong>Windows (PowerShell)</strong></p>
+<pre><code>irm https://raw.githubusercontent.com/kody-w/rapp-installer/main/install.ps1 | iex</code></pre>
+
+<p>The installer fetches Python, Git and the GitHub tool if your machine is missing them. Then sign in once and start it:</p>
+
+<pre><code>gh auth login
+brainstem</code></pre>
+
+<p>A browser tab opens at <code>http://localhost:7071</code>. That page is your Brainstem. If the tab doesn't open on its own, open that address yourself.</p>
+
+<div class="check"><strong>Check:</strong> you see a chat box in your browser. Type "hello" and get a reply.</div>
+
+<details><summary>If sign-in gets in the way</summary><p>If <code>gh auth login</code> isn't available, just run <code>brainstem</code>. The web page walks you through signing in with a code on github.com.</p></details>
+
+<hr>
+
+<h2 id="talk"><span class="clock">0:10</span><br>2. Talk to it</h2>
+
+<p>You've talked to it in the browser. Now talk to it from the terminal, because that's how every other program will talk to it too. Open a second terminal window and leave the first one running.</p>
+
+<p>First, ask if it's alive:</p>
+<pre><code>curl http://localhost:7071/health</code></pre>
+
+<p>You get back a list of the agents it knows. Now send it a message:</p>
+
+<pre><code>curl http://localhost:7071/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_input": "What can you do?"}'</code></pre>
+
+<p>The answer comes back in a field called <code>response</code>. That's the whole interface. Anything that can send a web request can use your Brainstem: a shortcut on your phone, a spreadsheet, another program, another Brainstem.</p>
+
+<div class="check"><strong>Check:</strong> you see <code>"response": "..."</code> in the terminal.</div>
+
+<p class="small">The Brainstem doesn't remember conversations between requests. If you want it to remember, send the earlier messages back in <code>conversation_history</code>. Keeping the memory on your side is what makes it simple and safe.</p>
+
+<hr>
+
+<h2 id="soul"><span class="clock">0:20</span><br>3. Give it a personality</h2>
+
+<p>The Brainstem's personality lives in one plain-text file called <code>soul.md</code>. Find it here:</p>
+
+<pre><code>~/.brainstem/src/rapp_brainstem/soul.md</code></pre>
+
+<p>Open it in any text editor (TextEdit and Notepad are fine). Read what's there. Then add a few lines of your own at the bottom, in plain English. For example:</p>
+
+<pre><code>You help me plan meals for a family of four.
+Keep answers short. Suggest one thing at a time.
+Never suggest fish; nobody here eats it.</code></pre>
+
+<p>Save the file. Go back to the browser and ask it something. It reads <code>soul.md</code> fresh on every message, so there's nothing to restart.</p>
+
+<div class="check"><strong>Check:</strong> the Brainstem now answers the way you told it to.</div>
+
+<p>This is the most important idea on the page. <strong>Your assistant is a folder of plain files you can read.</strong> The personality is a text file. The skills, which come next, are small files too. Nothing is hidden from you.</p>
+
+<hr>
+
+<h2 id="agent"><span class="clock">0:30</span><br>4. Build your first agent</h2>
+
+<p>An agent is one Python file that teaches the Brainstem one thing it can do. You don't need to know Python to do this step. Copy the file, change the words, done.</p>
+
+<p>Agents live in this folder:</p>
+<pre><code>~/.brainstem/src/rapp_brainstem/agents/</code></pre>
+
+<p>Create a new file there called <code>dice_agent.py</code>. The name must end in <code>_agent.py</code>; that's how the Brainstem finds it. Paste this in:</p>
+
+<pre><code>import random
+from basic_agent import BasicAgent
+
+class DiceAgent(BasicAgent):
+    def __init__(self):
+        self.name = "RollDice"
+        self.metadata = {
+            "name": self.name,
+            "description": "Rolls dice. Use this whenever someone asks to roll, flip, or pick at random.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sides": {"type": "integer", "description": "How many sides the die has. Default 6."},
+                    "count": {"type": "integer", "description": "How many dice to roll. Default 1."}
+                },
+                "required": []
+            }
+        }
+        super().__init__()
+
+    def perform(self, sides=6, count=1, **kwargs):
+        rolls = [random.randint(1, int(sides)) for _ in range(int(count))]
+        return f"Rolled {count} d{sides}: {rolls} (total {sum(rolls)})"</code></pre>
+
+<p>Save it. Now ask the Brainstem, in the browser or with curl: <em>"Roll three six-sided dice."</em></p>
+
+<div class="check"><strong>Check:</strong> the answer includes real numbers from your code, and the reply mentions it used <code>RollDice</code>.</div>
+
+<p>What just happened: the Brainstem noticed your new file, read the <code>description</code> to learn when to use it, and called your <code>perform</code> function when the question fit. There's no registration step and no restart. The description is the part that matters most. Write it the way you'd explain the tool to a new coworker.</p>
+
+<p><strong>Now make one that's yours.</strong> Copy <code>dice_agent.py</code> to a new name and change three things: the <code>name</code>, the <code>description</code>, and what <code>perform</code> returns. Ideas that take five minutes:</p>
+<ul>
+  <li>An agent that returns your family's standing weekly schedule.</li>
+  <li>An agent that reads a text file of your notes and hands it to the Brainstem.</li>
+  <li>An agent that calls a public weather or news website and returns the result.</li>
+</ul>
+
+<div class="check"><strong>Check:</strong> <code>curl http://localhost:7071/health</code> lists your new agent by name.</div>
+
+<hr>
+
+<h2 id="anywhere"><span class="clock">0:45</span><br>5. Use it from anywhere</h2>
+
+<p>Because the whole interface is one web address, you can plug your Brainstem into things you already use.</p>
+
+<p><strong>From a script.</strong> Any language that can make a web request. Here's Python:</p>
+<pre><code>import requests
+r = requests.post("http://localhost:7071/chat",
+                  json={"user_input": "Roll two dice"})
+print(r.json()["response"])</code></pre>
+
+<p><strong>From your phone or another computer on your Wi-Fi.</strong> Replace <code>localhost</code> with your computer's address on the network, like <code>http://192.168.1.20:7071</code>. An iPhone Shortcut with a "Get contents of URL" step can send <code>user_input</code> and read <code>response</code>.</p>
+
+<p><strong>From Claude Code or Copilot CLI.</strong> Both can install the Brainstem as a plugin and talk to it directly:</p>
+<pre><code>claude plugin marketplace add kody-w/rapp-installer
+claude plugin install rapp@brainstem</code></pre>
+
+<div class="check"><strong>Check:</strong> you got a <code>response</code> back from somewhere that is not the browser tab.</div>
+
+<p class="small">The promise behind all of this: <code>POST /chat</code> in, <code>response</code> out, agents as <code>*_agent.py</code> files. That contract doesn't change between versions. Build on it and your work keeps working.</p>
+
+<hr>
+
+<h2 id="share"><span class="clock">0:55</span><br>6. Share it</h2>
+
+<p>Your agents are just files, so sharing them is just sharing files.</p>
+
+<p><strong>Give a friend your agents.</strong> Put your <code>agents/</code> folder in a GitHub repository. In their Brainstem's web page there's a <strong>Sources</strong> panel. They paste your repo's address, and your agents load into their Brainstem. Any Python packages your agents need get installed on the way.</p>
+
+<p><strong>Publish one for everyone.</strong> The public registry of agents is <a href="https://github.com/kody-w/RAR">RAR</a>. Open a pull request with your agent file, and it becomes something anyone can pull.</p>
+
+<div class="check"><strong>Check:</strong> someone other than you has run one of your agents.</div>
+
+<hr>
+
+<h2><span class="clock">1:00</span><br>You're done. What you have now.</h2>
+
+<p>An assistant that runs on your own machine, with a personality you wrote, skills you built, and a door that anything can knock on. It costs nothing beyond your GitHub account, and every part of it is a plain file you can read, copy, and hand to someone else.</p>
+
+<p><strong>Where to go next</strong></p>
+<ul>
+  <li><a href="https://kody-w.github.io/rapp-installer/">The Brainstem home page</a>: install options and the full configuration list.</li>
+  <li><a href="https://github.com/kody-w/rapp-installer/blob/main/rapp_brainstem/README.md">The API reference</a>: every endpoint, including streaming.</li>
+  <li><a href="https://github.com/kody-w/RAR">RAR</a>: agents other people have published. Read a few; copy the ones you like.</li>
+  <li><a href="https://kody-w.github.io/rapp-1/">The RAPP spec</a>: the words and rules the whole ecosystem agrees on.</li>
+</ul>
+
+<p class="small">Something didn't work? <a href="https://github.com/kody-w/rapp-installer/issues">Open an issue</a> and say which step and what you saw. Fixing the lesson for the next person is part of the lesson.</p>
+
+<p class="small" id="lesson-v1">brainstem-in-an-hour v1 · 2026-11-02</p>
+
+</main>
+</body>
+</html>
