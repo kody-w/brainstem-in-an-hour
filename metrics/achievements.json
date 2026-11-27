@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-11-27T08:46:09.463147+00:00",
+ "generated_at": "2026-11-27T21:26:43.278461+00:00",
  "submissions": 1,
  "finished": 1,
  "counts": {
-  "first-skill": 0,
-  "complete": 1,
+  "personality": 0,
   "local-proof": 1,
   "connected": 0,
-  "personality": 0,
-  "started": 1
+  "first-skill": 0,
+  "started": 1,
+  "complete": 1
  }
 }
